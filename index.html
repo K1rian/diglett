@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diglett</title>
+    <link rel="icon" href="pokeball.png" type="image/jpeg">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-family: 'Courier New', Courier, monospace, sans-serif;
+            overflow: hidden;
+            margin: 0;
+            background-color: darkolivegreen;
+            background-image: repeating-linear-gradient(
+                45deg,
+                rgba(255, 255, 255, 0.2) 0,
+                rgba(255, 255, 255, 0.2) 20px,
+                transparent 20px,
+                transparent 40px
+            );
+            cursor: url("pokeball.png"), auto;
+        }
+
+        #puntaje, #temporizador {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: white;
+        }
+
+        .topo {
+            position: absolute;
+            width: 95px; /* Ajusta el tamaño según la imagen */
+            height: 95px;
+            cursor: url("pokeball.png"), auto;
+            transition: all 0.2s ease; /* Añade una transición suave */
+        }
+
+        #temporizador {
+            color: green; /* Color inicial del temporizador */
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>¡Caza al Diglett!</h1>
+    <div id="puntaje">Puntaje: 0</div>
+    <div id="temporizador">Tiempo: 30</div>
+
+    <!-- Elementos de audio -->
+    <audio id="sonidoCazar" src="diglett-sound.mp3" preload="auto"></audio>
+    <audio id="sonidoTiempo" src="alarm-sound.mp3" preload="auto"></audio>
+
+    <script>
+        const numeroTopos = 5; // Número de topos
+        let puntaje = 0;
+        let tiempo = 30; // Tiempo en segundos
+        const puntajeElemento = document.getElementById("puntaje");
+        const temporizadorElemento = document.getElementById("temporizador");
+        const sonidoCazar = document.getElementById("sonidoCazar");
+        const sonidoTiempo = document.getElementById("sonidoTiempo");
+        const topos = [];
+
+        // Crear varios topos
+        for (let i = 0; i < numeroTopos; i++) {
+            const topo = document.createElement('img');
+            topo.src = "https://db.pokemongohub.net/_next/image?url=%2Fimages%2Fofficial%2Ffull%2F050.webp&w=640&q=75";
+            topo.alt = "Topo";
+            topo.classList.add('topo');
+            topo.style.left = Math.random() * (window.innerWidth - 100) + "px";
+            topo.style.top = Math.random() * (window.innerHeight - 100) + "px";
+            topo.onclick = cazarTopo; // Asignar el evento de clic
+            document.body.appendChild(topo);
+            topos.push(topo);
+        }
+
+        function cazarTopo(event) {
+            puntaje++;
+            puntajeElemento.textContent = "Puntaje: " + puntaje;
+            sonidoCazar.currentTime = 0; // Reinicia el sonido para que se reproduzca de nuevo
+            sonidoCazar.play(); // Reproduce el sonido al cazar el topo
+
+            // Mueve el topo que fue clickeado a una nueva posición
+            const x = Math.random() * (window.innerWidth - 100);
+            const y = Math.random() * (window.innerHeight - 100);
+            event.target.style.left = x + "px";
+            event.target.style.top = y + "px";
+        }
+
+        // Función para iniciar el temporizador
+        function iniciarTemporizador() {
+            const intervalo = setInterval(() => {
+                tiempo--;
+                temporizadorElemento.textContent = "Tiempo: " + tiempo;
+
+                // Cambiar color cuando se está acabando el tiempo
+                if (tiempo <= 10) {
+                    temporizadorElemento.style.color = "red";
+                }
+
+                // Reproducir el sonido 1 segundo antes de que el tiempo se agote
+                if (tiempo === 1) {
+                    sonidoTiempo.play(); // Reproduce el sonido de alarma
+                }
+
+                // Cuando el tiempo llega a cero, detiene el juego
+                if (tiempo <= 0) {
+                    clearInterval(intervalo);
+                    topos.forEach(topo => topo.style.display = "none"); // Oculta los topos al terminar
+                    sonidoTiempo.play(); // Reproduce el sonido de alarma
+                    alert("¡Tiempo terminado! Puntaje final: " + puntaje);
+                    location.reload(); // Reinicia el juego
+                }
+            }, 1000); // Intervalo de 1 segundo
+        }
+
+        // Inicia el temporizador cuando la página carga
+        window.onload = iniciarTemporizador;
+    </script>
+
+</body>
+</html>
